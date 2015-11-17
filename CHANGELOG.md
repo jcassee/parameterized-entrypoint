@@ -1,5 +1,9 @@
 # Changelog
 
+## master
+
+- Add to_json and to_nice_json filters.
+
 ## 0.3.0
 
 - Improve error messages.

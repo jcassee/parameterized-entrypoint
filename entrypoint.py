@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import json
 import os
 import sys
 import traceback
@@ -12,9 +13,8 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
 def process_templates(options):
     env = Environment(loader=FileSystemLoader(options.template_root),
                 keep_trailing_newline=True, undefined=StrictUndefined)
-    env.filters.update({
-        'split': split_filter,
-    })
+    for name, func in filters().items():
+        env.filters[name] = func
 
     for root, dirs, files in os.walk(options.template_root):
         for file in files:
@@ -57,8 +57,23 @@ def print_exception():
         traceback.print_exception(exc_type, exc_value, exc_tb)
 
 
-def split_filter(value, sep=None, maxsplit=-1):
-    return value.split(sep, maxsplit)
+# Template filters
+
+def filters():
+
+    def split_filter(value, sep=None, maxsplit=-1):
+        return value.split(sep, maxsplit)
+
+    def to_json(value, *args, **kwargs):
+        return json.dumps(value, *args, **kwargs)
+
+    def to_nice_json(value, *args, **kwargs):
+        return json.dumps(value, indent=4, sort_keys=True, *args, **kwargs)
+
+    return locals()
+
+
+# Command line handling
 
 
 def parse_args(args=None):
