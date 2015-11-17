@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import json
 import os
@@ -61,7 +62,7 @@ def print_exception():
 
 def filters():
 
-    def split_filter(value, sep=None, maxsplit=-1):
+    def split(value, sep=None, maxsplit=-1):
         return value.split(sep, maxsplit)
 
     def to_json(value, *args, **kwargs):
