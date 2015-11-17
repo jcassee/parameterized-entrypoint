@@ -2,9 +2,11 @@
 
 import os
 import sys
+import traceback
 
 import argparse
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
+        UndefinedError
 
 
 def process_templates(options):
@@ -25,13 +27,33 @@ def process_templates(options):
                 os.makedirs(output_dir)
 
             template = env.get_template(template_file)
-            template.stream(os.environ).dump(output_file)
-
+            try:
+                output = template.render(os.environ)
+                with open(output_file, 'w') as out:
+                    out.write(output)
+            except Exception:
+                print_exception()
+                sys.exit(1)
 
 def exec_command(options):
     args = [options.command] + options.command_args
     if options.command:
         os.execvp(options.command, args)
+
+
+def print_exception():
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    tb = exc_tb
+    while tb is not None:
+        if tb.tb_frame.f_code.co_name == 'top-level template code':
+            error = traceback.format_exception(exc_type, exc_value, tb)
+            error[0] = 'Error rendering templates:\n'
+            for line in error:
+                sys.stderr.write(line)
+            break
+        tb = tb.tb_next
+    else:
+        traceback.print_exception(exc_type, exc_value, exc_tb)
 
 
 def split_filter(value, sep=None, maxsplit=-1):

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0
+
+- Improve error messages.
+
 ## 0.2.0
 
 - Add split filter.
