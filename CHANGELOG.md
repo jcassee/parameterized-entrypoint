@@ -1,6 +1,6 @@
 # Changelog
 
-## master
+## 0.4.0
 
 - Add to_json and to_nice_json filters.
 
