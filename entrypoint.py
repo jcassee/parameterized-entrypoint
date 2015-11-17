@@ -35,6 +35,7 @@ def process_templates(options):
                 print_exception()
                 sys.exit(1)
 
+
 def exec_command(options):
     args = [options.command] + options.command_args
     if options.command:

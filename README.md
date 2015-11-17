@@ -20,7 +20,8 @@ An example Dockerfile:
     FROM nginx
 
     COPY nginx.conf /templates/etc/nginx/nginx.conf
-    COPY dist/entrypoint /usr/local/bin/entrypoint
+	ADD https://github.com/jcassee/templating-entrypoint/releases/download/0.3.0/entrypoint_linux_amd64 /usr/local/bin/entrypoint
+	RUN chmod +x /usr/local/bin/entrypoint
 
     ENTRYPOINT ["entrypoint", "/templates", "/"]
 
