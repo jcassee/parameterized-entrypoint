@@ -10,6 +10,9 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 def process_templates(options):
     env = Environment(loader=FileSystemLoader(options.template_root),
                 keep_trailing_newline=True, undefined=StrictUndefined)
+    env.filters.update({
+        'split': split_filter,
+    })
 
     for root, dirs, files in os.walk(options.template_root):
         for file in files:
@@ -29,6 +32,10 @@ def exec_command(options):
     args = [options.command] + options.command_args
     if options.command:
         os.execvp(options.command, args)
+
+
+def split_filter(value, sep=None, maxsplit=-1):
+    return value.split(sep, maxsplit)
 
 
 def parse_args(args=None):

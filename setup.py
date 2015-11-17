@@ -14,7 +14,7 @@ class pyinstaller_build(build):
 
 setup(
     name='templating-entrypoint',
-    version='0.1.0',
+    version='0.2.0',
     author='Joost Cassee',
     author_email='joost@cassee.net',
 
