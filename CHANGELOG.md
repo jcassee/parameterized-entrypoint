@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.0
+
+- Add set theory filters.
+
 ## 0.4.0
 
 - Add to_json and to_nice_json filters.

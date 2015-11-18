@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from collections import Hashable
 import json
 import os
 import sys
@@ -70,6 +71,45 @@ def filters():
 
     def to_nice_json(value, *args, **kwargs):
         return json.dumps(value, indent=4, sort_keys=True, *args, **kwargs)
+
+    def unique(value):
+        if isinstance(value, Hashable):
+            result = set(value)
+        else:
+            result = []
+            for x in value:
+                if x not in result:
+                    result.append(x)
+        return result
+
+    def intersect(value, other):
+        if isinstance(value, Hashable) and isinstance(other, Hashable):
+            result = set(value) & set(other)
+        else:
+            result = unique(filter(lambda x: x in other, value))
+        return result
+
+    def difference(value, other):
+        if isinstance(value, Hashable) and isinstance(other, Hashable):
+            result = set(value) - set(other)
+        else:
+            result = unique(filter(lambda x: x not in other, value))
+        return result
+
+    def symmetric_difference(value, other):
+        if isinstance(value,Hashable) and isinstance(other,Hashable):
+            result = set(value) ^ set(other)
+        else:
+            result = unique(filter(lambda x: x not in intersect(value, other),
+                    union(value, other)))
+        return result
+
+    def union(value, other):
+        if isinstance(value, Hashable) and isinstance(other, Hashable):
+            result = set(value) | set(other)
+        else:
+            result = unique(value + other)
+        return result
 
     return locals()
 
