@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import argparse
 from collections import Hashable
 import json
 import os
 import sys
 import traceback
 
-import argparse
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
-        UndefinedError
+        Template, UndefinedError
+import yaml
+from yaml.scanner import ScannerError
 
 
-def process_templates(options):
+def process_templates(vars, options):
     env = Environment(loader=FileSystemLoader(options.template_root),
                 keep_trailing_newline=True, undefined=StrictUndefined)
     for name, func in filters().items():
@@ -29,34 +31,27 @@ def process_templates(options):
                 os.makedirs(output_dir)
 
             template = env.get_template(template_file)
-            try:
-                output = template.render(os.environ)
-                with open(output_file, 'w') as out:
-                    out.write(output)
-            except Exception:
-                print_exception()
-                sys.exit(1)
+            output = template.render(vars)
+            with open(output_file, 'w') as out:
+                out.write(output)
 
 
-def exec_command(options):
+def exec_command(vars, options):
+    template = Template(options.command, undefined=StrictUndefined)
     args = [options.command] + options.command_args
+    args = [Template(arg, undefined=StrictUndefined).render(vars)
+            for arg in args]
     if options.command:
-        os.execvp(options.command, args)
+        os.execvp(args[0], args)
 
 
-def print_exception():
-    exc_type, exc_value, exc_tb = sys.exc_info()
-    tb = exc_tb
-    while tb is not None:
-        if tb.tb_frame.f_code.co_name == 'top-level template code':
-            error = traceback.format_exception(exc_type, exc_value, tb)
-            error[0] = 'Error rendering templates:\n'
-            for line in error:
-                sys.stderr.write(line)
-            break
-        tb = tb.tb_next
-    else:
-        traceback.print_exception(exc_type, exc_value, exc_tb)
+def collect_vars(options):
+    if os.path.exists(options.variables_file):
+        with open(options.variables_file) as stream:
+            vars = yaml.safe_load(stream)
+    if not vars: vars = {}
+    vars.update(os.environ)
+    return vars
 
 
 # Template filters
@@ -119,27 +114,65 @@ def filters():
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(description='Render a directory hierarchy '
-            'of templates using environment variables and optionally execute a '
-            'command.')
-    parser.add_argument('template_root', metavar='TEMPLATE_ROOT',
-            help='directory containing a directory structure with templates')
-    parser.add_argument('output_root', metavar='OUTPUT_ROOT',
+            'of templates and execute a command.',
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-v', '--variables', metavar='VARIABLES',
+            dest='variables_file', default='/variables.yml',
+            help='optional YAML file containing template variables')
+    parser.add_argument('-t', '--templates', metavar='TEMPLATES',
+            dest='template_root', default='/templates',
+            help='directory structure containing template files')
+    parser.add_argument('-o', '--output', metavar='OUTPUT',
+            dest='output_root', default='/',
             help='output directory')
-    parser.add_argument('command', metavar='COMMAND [ARGS...]', nargs='?',
-            help='an optional command to execute after template processing')
+    parser.add_argument('command', metavar='COMMAND [ARGS...]',
+            help='the command to execute after template processing')
     parser.add_argument('command_args', nargs='*', help=argparse.SUPPRESS)
     parser.epilog = '''
-        The template directory file hierarchy will be maintained in the output
-        directory. For example, TEMPLATE_ROOT/some/file.txt will be rendered as
-        OUTPUT_ROOT/some/file.txt.
+        First, variables are be read from the YAML file VARIABLES and from the
+        environment, the latter overriding the former.
+
+        Then, all templates in the TEMPLATES directory are rendered into the
+        OUTPUT directory, maintaining the file hierarchy.(For example,
+        TEMPLATES/some/file.txt will be rendered as OUTPUT/some/file.txt.)
+
+        Finally, the COMMAND is executed. Template variables can also be used in
+        the command and its arguments.
     '''
     return parser.parse_args(args)
 
 
+def print_exception():
+    """Print nicer template and YAML parse errors."""
+    exc_type, exc_value, exc_tb = sys.exc_info()
+    tb = exc_tb
+    while tb is not None:
+        if tb.tb_frame.f_code.co_name == 'top-level template code':
+            error = traceback.format_exception(exc_type, exc_value, tb)
+            error[0] = 'Error rendering templates:\n'
+            for line in error:
+                sys.stderr.write(line)
+            break
+        tb = tb.tb_next
+    else:
+        if exc_type == ScannerError:
+            sys.stderr.write('Error ')
+            sys.stderr.write(unicode(exc_value))
+            sys.stderr.write('\n')
+        else:
+            traceback.print_exception(exc_type, exc_value, exc_tb)
+
+
 def main():
-    options = parse_args()
-    process_templates(options)
-    exec_command(options)
+    try:
+        options = parse_args()
+        vars = collect_vars(options)
+        process_templates(vars, options)
+        exec_command(vars,  options)
+    except Exception:
+        print_exception()
+        sys.exit(1)
+
 
 
 if __name__ == '__main__':

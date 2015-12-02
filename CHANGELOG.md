@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0
+
+- Read variables from YAML file.
+- Allow template variables in command.
+- Use options for configuration instead of positition arguments.
+
 ## 0.5.0
 
 - Add set theory filters.
