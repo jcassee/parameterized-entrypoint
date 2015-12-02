@@ -113,8 +113,10 @@ def filters():
 
 
 def parse_args(args=None):
-    parser = argparse.ArgumentParser(description='Render a directory hierarchy '
-            'of templates and execute a command.',
+    parser = argparse.ArgumentParser(
+            usage='%(prog)s [OPTIONS] [--] COMMAND [ARGS...]',
+            description='Render a directory hierarchy '
+                'of templates and execute a command.',
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-v', '--variables', metavar='VARIABLES',
             dest='variables_file', default='/variables.yml',
@@ -137,7 +139,8 @@ def parse_args(args=None):
         TEMPLATES/some/file.txt will be rendered as OUTPUT/some/file.txt.)
 
         Finally, the COMMAND is executed. Template variables can also be used in
-        the command and its arguments.
+        the command and its arguments. Add '--' before the command if any ARGS
+        start with '-'.
     '''
     return parser.parse_args(args)
 

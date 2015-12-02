@@ -16,7 +16,7 @@ An example Dockerfile:
 	ADD https://github.com/jcassee/templating-entrypoint/releases/download/0.6.0/entrypoint_linux_amd64 /usr/local/bin/entrypoint
 	RUN chmod +x /usr/local/bin/entrypoint
 
-    ENTRYPOINT ["entrypoint"]
+    ENTRYPOINT ["entrypoint", "--"]
 
     RUN ["nginx", "-g", "daemon off;"]
 
