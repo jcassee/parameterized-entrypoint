@@ -48,8 +48,9 @@ def exec_command(vars, options):
 def collect_vars(options):
     if os.path.exists(options.variables_file):
         with open(options.variables_file) as stream:
-            vars = yaml.safe_load(stream)
-    if not vars: vars = {}
+            vars = yaml.safe_load(stream) or {}
+    else:
+        vars = {}
     vars.update(os.environ)
     return vars
 

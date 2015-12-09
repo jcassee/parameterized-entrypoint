@@ -13,12 +13,12 @@ class pyinstaller_build(build):
 
 
 setup(
-    name='templating-entrypoint',
-    version='0.5.0',
+    name='parameterized-entrypoint',
+    version='0.7.0',
     author='Joost Cassee',
     author_email='joost@cassee.net',
 
-    url='https://github.com/jcassee/templating-entrypoint',
+    url='https://github.com/jcassee/parameterized-entrypoint',
     license='MIT',
     description='Docker entrypoint that processes template files.',
     keywords=['Jinja2', 'templating', 'Docker'],

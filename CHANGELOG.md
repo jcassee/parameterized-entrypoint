@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0
+
+- Project renamed to parameterized-entrypoint.
+
+## 0.6.1
+
+- Fix bug in variable handling.
+
 ## 0.6.0
 
 - Read variables from YAML file.
