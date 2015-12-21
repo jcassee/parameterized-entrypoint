@@ -8,18 +8,19 @@ import os
 import sys
 import traceback
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined, \
+from jinja2 import BaseLoader, Environment, FileSystemLoader, StrictUndefined, \
         Template, UndefinedError
 import yaml
 from yaml.scanner import ScannerError
 
 
-def process_templates(vars, options):
-    env = Environment(loader=FileSystemLoader(options.template_root),
-                keep_trailing_newline=True, undefined=StrictUndefined)
-    for name, func in filters().items():
-        env.filters[name] = func
+class SourceLoader(BaseLoader):
+    def get_source(self, environment, template):
+        return template, None, lambda: True
 
+
+def process_templates(vars, options):
+    env = get_env(FileSystemLoader(options.template_root))
     for root, dirs, files in os.walk(options.template_root):
         for file in files:
             template_file = os.path.relpath(os.path.join(root, file),
@@ -37,10 +38,10 @@ def process_templates(vars, options):
 
 
 def exec_command(vars, options):
-    template = Template(options.command, undefined=StrictUndefined)
+    env = get_env(SourceLoader())
+    template = env.get_template(options.command)
     args = [options.command] + options.command_args
-    args = [Template(arg, undefined=StrictUndefined).render(vars)
-            for arg in args]
+    args = [env.get_template(arg).render(vars) for arg in args]
     if options.command:
         os.execvp(args[0], args)
 
@@ -53,6 +54,14 @@ def collect_vars(options):
         vars = {}
     vars.update(os.environ)
     return vars
+
+
+def get_env(loader):
+    env = Environment(loader=loader, keep_trailing_newline=True,
+            undefined=StrictUndefined)
+    for name, func in filters().items():
+        env.filters[name] = func
+    return env
 
 
 # Template filters

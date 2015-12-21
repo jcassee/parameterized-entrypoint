@@ -1,0 +1,7 @@
+.git
+.gitignore
+CHANGELOG.md
+README.md
+*.spec
+dist
+build

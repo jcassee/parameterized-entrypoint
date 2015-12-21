@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.8.0
+
+- Add Alpine Linux build via Docker.
+
 ## 0.7.0
 
 - Project renamed to parameterized-entrypoint.

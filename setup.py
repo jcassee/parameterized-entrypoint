@@ -1,10 +1,11 @@
 import os
+from subprocess import check_call, Popen
 
 from setuptools import setup, find_packages
 from distutils.command.build import build
 
 
-class pyinstaller_build(build):
+class build_pyinstaller(build):
     def run(self):
         build.run(self)
 
@@ -12,9 +13,22 @@ class pyinstaller_build(build):
         run(['-F', 'entrypoint.py'])
 
 
+class build_docker_alpine(build):
+    def run(self):
+        build.run(self)
+
+        check_call(['docker', 'build', '-t', 'build-alpine',
+                '-f', 'Dockerfile.build-alpine', '.'])
+        # Create as executable file
+        mode = (os.O_WRONLY | os.O_TRUNC | os.O_CREAT)
+        with os.fdopen(os.open('dist/entrypoint-alpine', mode)) as output:
+            Popen(['docker', 'run', '--rm', 'build-alpine',
+                    'cat', 'dist/entrypoint'], stdout=output)
+
+
 setup(
     name='parameterized-entrypoint',
-    version='0.7.0',
+    version='0.8.0',
     author='Joost Cassee',
     author_email='joost@cassee.net',
 
@@ -23,7 +37,10 @@ setup(
     description='Docker entrypoint that processes template files.',
     keywords=['Jinja2', 'templating', 'Docker'],
 
-    cmdclass={'build': pyinstaller_build},
+    cmdclass={
+        'build': build_pyinstaller,
+        'build_alpine': build_docker_alpine,
+    },
 
     py_modules=['entrypoint'],
     entry_points={

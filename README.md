@@ -26,8 +26,9 @@ When you run the container, all environment variables will be available in the
 	docker run -e domain=www.example.com example/nginx
 
 If using environment variables is inconvenient, for example because the values
-are structured, you can also use `/variables.yml`:
+are structured, you can set them in `/variables.yml`:
 
+    echo 'domain: www.example.com' > variables.yml
 	docker run -v $PWD/variables.yml:/variables.yml example/nginx
 
 Paths can be customized using `entrypoint` command line options. See `entrypoint
@@ -40,3 +41,16 @@ Paths can be customized using `entrypoint` command line options. See `entrypoint
     python setup.py build
 
 The application is available at `dist/entrypoint`.
+
+It is also possible to build the [Alpine Linux](http://alpinelinux.org) binary
+using Docker:
+
+    python setup.py build_alpine
+
+The Alpine binary will be saved to `dist/entrypoint-alpine`. In order to use
+it, though, you need to add the following directive to your Dockerfile:
+
+    RUN ln -sfn /lib /lib64 && \
+        ln -sfn /lib/ld-musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
+
+(See [this discussion on GitHub](https://github.com/gliderlabs/docker-alpine/issues/48).)

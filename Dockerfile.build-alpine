@@ -1,0 +1,13 @@
+FROM alpine
+
+RUN apk update && \
+	apk add python-dev py-pip
+
+COPY . /src
+WORKDIR /src
+
+RUN pip install -r requirements.txt && \
+	adduser -s /bin/ash -h /src -D build && \
+	chown -R build:build . && \
+	su -c 'python setup.py build' build
+
