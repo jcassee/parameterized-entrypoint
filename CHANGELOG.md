@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0
+
+- Run scripts before executing the command.
+
 ## 0.8.0
 
 - Add Alpine Linux build via Docker.
