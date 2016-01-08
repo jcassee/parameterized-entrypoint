@@ -1,8 +1,8 @@
 Docker parameterized entrypoint
 ===============================
 
-A Docker entrypoint script that renders templates before starting the main
-application.
+A Docker entrypoint script that renders templates and runs scripts before
+starting the main application.
 
 
 ## Usage

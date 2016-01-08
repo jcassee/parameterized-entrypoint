@@ -5,6 +5,7 @@ import argparse
 from collections import Hashable
 import json
 import os
+import subprocess
 import sys
 import traceback
 
@@ -35,6 +36,19 @@ def process_templates(vars, options):
             output = template.render(vars)
             with open(output_file, 'w') as out:
                 out.write(output)
+
+
+def run_scripts(vars, options):
+    try:
+        filenames = sorted(os.listdir(options.scripts_root))
+    except OSError:
+        return
+    for filename in filenames:
+        script = os.path.join(options.scripts_root, filename)
+        try:
+            subprocess.call([script])
+        except OSError:
+            pass
 
 
 def exec_command(vars, options):
@@ -137,6 +151,9 @@ def parse_args(args=None):
     parser.add_argument('-o', '--output', metavar='OUTPUT',
             dest='output_root', default='/',
             help='output directory')
+    parser.add_argument('-s', '--scripts', metavar='SCRIPTS',
+            dest='scripts_root', default='/scripts',
+            help='directory containing scripts to run before the command')
     parser.add_argument('command', metavar='COMMAND [ARGS...]',
             help='the command to execute after template processing')
     parser.add_argument('command_args', nargs='*', help=argparse.SUPPRESS)
@@ -144,9 +161,11 @@ def parse_args(args=None):
         First, variables are be read from the YAML file VARIABLES and from the
         environment, the latter overriding the former.
 
-        Then, all templates in the TEMPLATES directory are rendered into the
+        Second, all templates in the TEMPLATES directory are rendered into the
         OUTPUT directory, maintaining the file hierarchy.(For example,
         TEMPLATES/some/file.txt will be rendered as OUTPUT/some/file.txt.)
+
+        Then, any executable script in the SCRIPTS directory are run.
 
         Finally, the COMMAND is executed. Template variables can also be used in
         the command and its arguments. Add '--' before the command if any ARGS
@@ -181,6 +200,7 @@ def main():
         options = parse_args()
         vars = collect_vars(options)
         process_templates(vars, options)
+        run_scripts(vars, options)
         exec_command(vars,  options)
     except Exception:
         print_exception()
