@@ -34,6 +34,10 @@ are structured, you can set them in `/variables.yml`:
 Paths can be customized using `entrypoint` command line options. See `entrypoint
 -h` for more details.
 
+If you are debugging a container it is sometimes useful to disable the
+entrypoint functionality. Set the `SKIP_ENTRYPOINT` environment variable to a
+non-empty value to only run the command.
+
 
 ## Building
 

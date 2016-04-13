@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.10.0
+
+- Use SKIP_ENTRYPOINT to only run the command.
+
 ## 0.9.0
 
 - Run scripts before executing the command.

@@ -198,14 +198,17 @@ def print_exception():
 def main():
     try:
         options = parse_args()
-        vars = collect_vars(options)
-        process_templates(vars, options)
-        run_scripts(vars, options)
+        if not os.environ.get('SKIP_ENTRYPOINT'):
+            vars = collect_vars(options)
+            process_templates(vars, options)
+            run_scripts(vars, options)
+        else:
+            sys.stderr.write('SKIP_ENTRYPOINT is set, skipping entrypoint\n')
+            vars = {}
         exec_command(vars,  options)
     except Exception:
         print_exception()
         sys.exit(1)
-
 
 
 if __name__ == '__main__':
